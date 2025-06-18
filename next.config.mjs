@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Puppeteer サポート
-  experimental: {
-    serverComponentsExternalPackages: ['puppeteer-core'],
-  },
+experimental: {
+  serverComponentsExternalPackages: ['puppeteer'],
+},
   
   // 画像最適化設定
   images: {
@@ -95,12 +95,12 @@ const nextConfig = {
   },
   
   // Puppeteer の設定
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals.push('puppeteer-core');
-    }
-    return config;
-  },
+webpack: (config, { isServer }) => {
+  if (isServer) {
+    config.externals.push('puppeteer');
+  }
+  return config;
+},
   
   // 🔥 追加: TypeScript設定
   typescript: {
