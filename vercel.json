@@ -42,20 +42,6 @@
       "REDIS_URL": "@redis_url"
     }
   },
-  "routes": [
-    {
-      "src": "/api/python-demo/(.*)",
-      "dest": "/api/python-demo/$1"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/app/api/$1/route"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
   "headers": [
     {
       "source": "/api/(.*)",
