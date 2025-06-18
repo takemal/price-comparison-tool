@@ -1,40 +1,175 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    domains: [
-      'img1.kakaku.k-img.com',
-      'img2.kakaku.k-img.com',
-      'img3.kakaku.k-img.com',
-      'kakaku.k-img.com',
-      'picsum.photos',
-      'via.placeholder.com',
-      'images.unsplash.com',
+  // 🔧 Puppeteer対応: ES Modules トランスパイル設定
+  experimental: {
+    // サーバーコンポーネントの外部パッケージ設定
+    serverComponentsExternalPackages: [
+      'puppeteer-core',
+      '@sparticuz/chromium'
     ],
-    remotePatterns: [
-      { protocol: 'https', hostname: '**.kakaku.k-img.com', pathname: '/**' },
-      { protocol: 'https', hostname: 'picsum.photos', pathname: '/**' },
-      { protocol: 'https', hostname: 'search.kakaku.com', pathname: '/**' },
-    ],
-    dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    unoptimized: false,
-    loader: 'default',
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // ESモジュールトランスパイル有効化
+    esmExternals: 'loose'
   },
+
+  // 🔧 Webpack設定: Puppeteerモジュール除外
+  webpack: (config, { isServer, dev }) => {
+    // サーバーサイドでPuppeteerを外部化
+    if (isServer) {
+      config.externals = config.externals || [];
+      
+      // Puppeteer関連パッケージを外部化
+      config.externals.push({
+        'puppeteer-core': 'commonjs puppeteer-core',
+        '@sparticuz/chromium': 'commonjs @sparticuz/chromium'
+      });
+    }
+
+    // 🔧 モジュール解決設定
+    config.resolve = {
+      ...config.resolve,
+      fallback: {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+        path: false,
+        stream: false,
+        util: false,
+        url: false,
+        zlib: false,
+        http: false,
+        https: false,
+        assert: false,
+        os: false,
+        constants: false
+      }
+    };
+
+    // 🔧 バベル設定: プライベートフィールド対応
+    config.module.rules.push({
+      test: /\.m?js$/,
+      include: /node_modules\/puppeteer-core/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: [
+            ['@babel/preset-env', {
+              targets: {
+                node: '18'
+              }
+            }]
+          ],
+          plugins: [
+            '@babel/plugin-proposal-private-methods',
+            '@babel/plugin-proposal-class-properties'
+          ]
+        }
+      }
+    });
+
+    return config;
+  },
+
+  // 🔧 画像最適化設定
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'img.kakaku.com',
+        port: '',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'kakaku.k-img.com',
+        port: '',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'img1.kakaku.k-img.com',
+        port: '',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        port: '',
+        pathname: '/**'
+      }
+    ],
+    // 画像最適化無効化（外部画像が多いため）
+    unoptimized: true
+  },
+
+  // 🔧 ESLint設定
+  eslint: {
+    // ビルド時のESLintエラーを警告として扱う
+    ignoreDuringBuilds: false
+  },
+
+  // 🔧 TypeScript設定
+  typescript: {
+    // ビルド時の型チェックエラーを無視（開発時はチェック）
+    ignoreBuildErrors: false
+  },
+
+  // 🔧 出力設定
+  output: 'standalone',
+
+  // 🔧 環境変数
+  env: {
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true',
+    PUPPETEER_EXECUTABLE_PATH: process.env.NODE_ENV === 'production' ? '/usr/bin/google-chrome-stable' : undefined
+  },
+
+  // 🔧 セキュリティヘッダー
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/api/(.*)',
         headers: [
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-        ],
-      },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*'
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS'
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
+          }
+        ]
+      }
     ];
   },
+
+  // 🔧 リダイレクト設定
+  async redirects() {
+    return [
+      {
+        source: '/scrape',
+        destination: '/api/scrape',
+        permanent: true
+      }
+    ];
+  }
 };
 
+// 🔧 ES Module形式でエクスポート
 export default nextConfig;
