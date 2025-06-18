@@ -33,7 +33,8 @@ class SpeedOptimizedScraper {
           '--disable-features=VizDisplayCompositor',
           '--disable-extensions',
           '--window-size=1200,800',
-          '--enable-javascript'
+          '--enable-javascript',
+          '--max_old_space_size=460', // Render無料プラン対応
         ],
         timeout: 8000
       });

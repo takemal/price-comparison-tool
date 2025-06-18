@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: price-comparison-tool
+    runtime: node
+    plan: free
+    region: oregon
+    
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: false
+      - key: PUPPETEER_ARGS
+        value: "--no-sandbox,--disable-setuid-sandbox,--disable-dev-shm-usage"
+    
+    healthCheckPath: /
+    autoDeploy: true

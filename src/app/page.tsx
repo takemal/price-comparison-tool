@@ -268,9 +268,9 @@ export default function HomePage() {
                     価格.comから最新の商品情報を自動取得。JavaScript + Python両実装で安定した高速検索を実現。
                   </p>
                   <p className="mt-6">
-                    <a href="/demo" className="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
-                      実装デモを見る <span aria-hidden="true">→</span>
-                    </a>
+                    <span className="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">
+                      使って見る <span aria-hidden="true">→</span>
+                    </span>
                   </p>
                 </dd>
               </div>
