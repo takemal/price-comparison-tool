@@ -36,8 +36,6 @@
   },
   "build": {
     "env": {
-      "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@google_service_account_email",
-      "GOOGLE_PRIVATE_KEY": "@google_private_key",
       "DATABASE_URL": "@database_url",
       "REDIS_URL": "@redis_url"
     }
