@@ -3,32 +3,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "functions": {
-    "app/api/scrape/route.ts": {
-      "maxDuration": 30,
-      "memory": 1024
-    },
-    "app/api/analyze/route.ts": {
-      "runtime": "nodejs18.x",
-      "maxDuration": 25,
-      "memory": 512
-    },
-    "app/api/export/route.ts": {
-      "runtime": "nodejs18.x",
-      "maxDuration": 20,
-      "memory": 512
-    },
-    "app/api/sheets/route.ts": {
-      "runtime": "nodejs18.x",
-      "maxDuration": 15,
-      "memory": 256
-    },
-    "api/python-demo/scrape.py": {
-      "runtime": "python3.9",
-      "maxDuration": 25,
-      "memory": 512
-    }
-  },
   "env": {
     "NODE_ENV": "production",
     "NEXT_PUBLIC_API_URL": "https://price-comparison-tool.vercel.app"
