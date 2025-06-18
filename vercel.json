@@ -1,0 +1,135 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "functions": {
+    "app/api/scrape/route.ts": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 30,
+      "memory": 1024
+    },
+    "app/api/analyze/route.ts": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 25,
+      "memory": 512
+    },
+    "app/api/export/route.ts": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 20,
+      "memory": 512
+    },
+    "app/api/sheets/route.ts": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 15,
+      "memory": 256
+    },
+    "api/python-demo/scrape.py": {
+      "runtime": "python3.9",
+      "maxDuration": 25,
+      "memory": 512
+    }
+  },
+  "env": {
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_API_URL": "https://price-comparison-tool.vercel.app"
+  },
+  "build": {
+    "env": {
+      "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@google_service_account_email",
+      "GOOGLE_PRIVATE_KEY": "@google_private_key",
+      "DATABASE_URL": "@database_url",
+      "REDIS_URL": "@redis_url"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/python-demo/(.*)",
+      "dest": "/api/python-demo/$1"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/app/api/$1/route"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Requested-With"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "s-maxage=60, stale-while-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/search",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/docs",
+      "destination": "https://github.com/[username]/price-comparison-tool#readme",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/robots.txt",
+      "destination": "/api/robots"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "regions": ["nrt1"],
+  "installCommand": "npm install",
+  "devCommand": "npm run dev",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./"
+}
