@@ -64,8 +64,10 @@ async initialize(): Promise<void> {
       ? await import('puppeteer-core')
       : await import('puppeteer'); // devDependencies の puppeteer
 
+    const chromium = await import('@sparticuz/chromium');
+
     const executablePath = isProduction
-      ? await chromium.executablePath
+      ? await chromium.default.executablePath()
       : undefined; // puppeteer が自前で解決
 
     if (isProduction && !executablePath) {
@@ -73,8 +75,8 @@ async initialize(): Promise<void> {
     }
 
       this.browser = await (puppeteer as any).launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
+        args: chromium.default.args,
+        defaultViewport: chromium.default.defaultViewport,
         executablePath,
         headless: true,
       });
