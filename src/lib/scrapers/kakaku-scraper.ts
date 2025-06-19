@@ -1,7 +1,9 @@
 // lib/scrapers/kakaku-scraper.ts - 完全型エラー修正版
-import puppeteer, { Browser, Page } from 'puppeteer';
 import * as cheerio from 'cheerio';
 import { Product, SearchFilters, ScrapingError, ProductDetail, Store, Ranking } from '@/lib/types';
+import chromium from 'chrome-aws-lambda';
+import puppeteer from 'puppeteer-core';
+import type { Browser, Page, HTTPRequest } from 'puppeteer-core';
 
 /**
  * ⚡ Speed Optimized Scraper - 完全型エラー修正版
@@ -16,37 +18,70 @@ class SpeedOptimizedScraper {
   /**
    * 超高速ブラウザ初期化
    */
-  async initialize(): Promise<void> {
-    if (this.isInitialized && this.browser) return;
+  // async initialize(): Promise<void> {
+  //   if (this.isInitialized && this.browser) return;
     
-    try {
-      console.log('⚡ Speed Optimized 初期化開始...');
-      const initStart = Date.now();
+  //   try {
+  //     console.log('⚡ Speed Optimized 初期化開始...');
+  //     const initStart = Date.now();
       
-      this.browser = await puppeteer.launch({
+  //     this.browser = await puppeteer.launch({
+  //       headless: true,
+  //       args: [
+  //         '--no-sandbox',
+  //         '--disable-setuid-sandbox',
+  //         '--disable-dev-shm-usage',
+  //         '--disable-web-security',
+  //         '--disable-features=VizDisplayCompositor',
+  //         '--disable-extensions',
+  //         '--window-size=1200,800',
+  //         '--enable-javascript',
+  //         '--max_old_space_size=460', // Render無料プラン対応
+  //       ],
+  //       timeout: 8000
+  //     });
+      
+  //     this.isInitialized = true;
+  //     console.log(`⚡ 初期化完了: ${Date.now() - initStart}ms`);
+      
+  //   } catch (error) {
+  //     console.error('❌ 初期化エラー:', error);
+  //     throw new Error(`ブラウザ初期化失敗: ${error}`);
+  //   }
+  // }
+
+async initialize(): Promise<void> {
+  if (this.isInitialized && this.browser) return;
+
+  try {
+    console.log('⚡ Speed Optimized 初期化開始...');
+    const initStart = Date.now();
+
+    const isProduction = !!process.env.AWS_EXECUTION_ENV || process.env.NODE_ENV === 'production';
+
+    // puppeteer を動的に読み込み（開発 or 本番で切り替え）
+    const puppeteer = isProduction
+      ? await import('puppeteer-core')
+      : await import('puppeteer'); // devDependencies の puppeteer
+
+    const executablePath = isProduction
+      ? await chromium.executablePath
+      : undefined; // puppeteer が自前で解決
+
+      this.browser = await (puppeteer as any).launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath,
         headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-web-security',
-          '--disable-features=VizDisplayCompositor',
-          '--disable-extensions',
-          '--window-size=1200,800',
-          '--enable-javascript',
-          '--max_old_space_size=460', // Render無料プラン対応
-        ],
-        timeout: 8000
       });
-      
-      this.isInitialized = true;
-      console.log(`⚡ 初期化完了: ${Date.now() - initStart}ms`);
-      
-    } catch (error) {
-      console.error('❌ 初期化エラー:', error);
-      throw new Error(`ブラウザ初期化失敗: ${error}`);
-    }
+
+    this.isInitialized = true;
+    console.log(`⚡ 初期化完了: ${Date.now() - initStart}ms`);
+  } catch (error) {
+    console.error('❌ 初期化エラー:', error);
+    throw new Error(`ブラウザ初期化失敗: ${error}`);
   }
+}
   
   /**
    * ⚡ 10秒以内検索実行

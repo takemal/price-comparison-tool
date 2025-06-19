@@ -13,6 +13,12 @@ const nextConfig = {
 
   // 🔧 Webpack設定: Puppeteerモジュール除外
   webpack: (config, { isServer, dev }) => {
+    // .map ファイルを読み込まないように除外
+    config.module.rules.push({
+      test: /\.js\.map$/,
+      use: 'ignore-loader',
+    });
+    
     // サーバーサイドでPuppeteerを外部化
     if (isServer) {
       config.externals = config.externals || [];
