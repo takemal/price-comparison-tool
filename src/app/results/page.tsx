@@ -25,7 +25,8 @@ import {
   Settings,
   Shield,
   Zap,
-  Image as ImageIcon
+  Image as ImageIcon,
+  AlertTriangle
 } from 'lucide-react'
 import { Product } from '@/lib/types'
 import { ExportButton } from '@/components/results/ExportButton'
@@ -490,41 +491,66 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {/* 安全スクレイピング情報表示（修正版） */}
+  {/* 安全スクレイピング情報表示（環境制約説明付き修正版） */}
       {results.warnings && results.warnings.length > 0 && (
-        <div className="bg-green-50 border-l-4 border-green-400 p-4">
-          <div className="container-custom">
-            <div className="flex">
-              <Shield className="h-5 w-5 text-green-400 mr-2" />
-              <div>
-                <h3 className="text-sm font-medium text-green-800 flex items-center">
-                  <Zap className="h-4 w-4 mr-1" />
-                  安全スクレイピング実行状況：遅延ローディング実施のため処理設定/各サイトではより高速化が可能。
-                </h3>
-                <ul className="mt-1 text-sm text-green-700 space-y-1">
-                  {results.warnings.map((warning, index) => {
-                    // 警告メッセージを安全性とパフォーマンス情報に変換
-                    if (warning.includes('目標達成') || warning.includes('秒')) {
+        <div className="space-y-3">
+          {/* デプロイ環境制約の説明 */}
+            <div className="bg-orange-50 border-l-4 border-orange-400 p-4">
+              <div className="container-custom">
+                <div className="flex">
+                  <AlertTriangle className="h-5 w-5 text-orange-400 mr-2 flex-shrink-0" />
+                  <div>
+                    <div className="text-sm text-orange-700 space-y-2">
+                      <p>
+                        もし現在、サンプルデータが表示されている場合、デプロイ環境のシステムライブラリ更新またはお使いの実行環境により、
+                        スクレイピング処理が正常に動作していない可能性があります。(環境設定の微修正要)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          {/* 通常の安全スクレイピング情報 */}
+          <div className="bg-green-50 border-l-4 border-green-400 p-4">
+            <div className="container-custom">
+              <div className="flex">
+                <Shield className="h-5 w-5 text-green-400 mr-2" />
+                <div>
+                  <h3 className="text-sm font-medium text-green-800 flex items-center">
+                    <Zap className="h-4 w-4 mr-1" />
+                    安全スクレイピング実行状況：遅延ローディング実施のため処理設定/各サイトではより高速化が可能
+                  </h3>
+                  <ul className="mt-1 text-sm text-green-700 space-y-1">
+                    {results.warnings.map((warning, index) => {
+                      // フォールバック関連の警告は除外（上で説明済み）
+                      if (warning.includes('フォールバック') || warning.includes('テストデータ') || warning.includes('Speed エラー')) {
+                        return null;
+                      }
+
+                      // 警告メッセージを安全性とパフォーマンス情報に変換
+                      if (warning.includes('目標達成') || warning.includes('秒')) {
+                        return (
+                          <li key={index} className="flex items-center">
+                            <Zap className="h-3 w-3 mr-2 text-green-600" />
+                            ⚡ 高速処理完了: {warning}
+                          </li>
+                        );
+                      }
+                      
                       return (
                         <li key={index} className="flex items-center">
-                          <Zap className="h-3 w-3 mr-2 text-green-600" />
-                          ⚡ 高速処理完了: {warning}
+                          <ImageIcon className="h-3 w-3 mr-2 text-green-600" />
+                          📡 安全なページ情報・画像遅延ローディングを実施・取得中: {warning}
                         </li>
                       );
-                    }
-                    
-                    return (
-                      <li key={index} className="flex items-center">
-                        <ImageIcon className="h-3 w-3 mr-2 text-green-600" />
-                        📡 安全なページ情報・画像遅延ローディングを実施・取得中: {warning}
-                      </li>
-                    );
-                  })}
-                  <li className="flex items-center mt-2">
-                    <Shield className="h-3 w-3 mr-2 text-green-600" />
-                    🚀 より高速化が可能: キャッシュ・並列処理により更なる高速化に対応可能
-                  </li>
-                </ul>
+                    })}
+                    <li className="flex items-center mt-2">
+                      <Shield className="h-3 w-3 mr-2 text-green-600" />
+                      🚀 より高速化が可能: キャッシュ・並列処理により更なる高速化に対応可能
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

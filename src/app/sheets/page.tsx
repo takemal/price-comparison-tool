@@ -301,7 +301,7 @@ export default function SheetsPage() {
                   )}
                   {connectionStatus.error && (
                     <p className="text-sm text-red-600 mt-1">
-                      エラー: {connectionStatus.error}
+                      エラー: デプロイ環境のシステムライブラリ更新またはお使いの実行環境により、正常に動作していない可能性があります。(環境設定の微修正が必要)
                     </p>
                   )}
                 </div>
