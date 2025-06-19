@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SearchFilters, ApiResponse, Product } from '@/lib/types';
 
+export const runtime = 'nodejs';
+
 // 🔥 動的インポートでスクレイパーを読み込み（undefinedエラー回避）
 async function getKakakuScraper() {
   try {

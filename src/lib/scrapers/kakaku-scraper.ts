@@ -68,6 +68,10 @@ async initialize(): Promise<void> {
       ? await chromium.executablePath
       : undefined; // puppeteer が自前で解決
 
+    if (isProduction && !executablePath) {
+      throw new Error('❌ 本番環境で executablePath が取得できません。chrome-aws-lambda が動作していない可能性があります');
+    }
+
       this.browser = await (puppeteer as any).launch({
         args: chromium.args,
         defaultViewport: chromium.defaultViewport,
