@@ -1,4 +1,5 @@
 // app/api/sheets/route.ts - 修正版（重複削除）
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleSpreadsheet } from 'google-spreadsheet'
 import { JWT } from 'google-auth-library'

@@ -1,6 +1,7 @@
 // src/app/api/export/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { Product } from '@/lib/types'
+export const runtime = 'nodejs';
 
 interface ExportRequest {
   products: Product[]

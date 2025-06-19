@@ -1,4 +1,5 @@
 // src/app/api/product/[id]/route.ts - 最終版
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { ProductDetailResponse } from '@/lib/types';
 import { kakakuScraper } from '@/lib/scrapers/kakaku-scraper';
