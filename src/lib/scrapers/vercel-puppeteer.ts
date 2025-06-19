@@ -1,6 +1,8 @@
 // lib/scrapers/vercel-puppeteer.ts - Vercel対応版
-import puppeteer, { Browser, Page } from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
+import { Browser, Page } from 'puppeteer-core';
+import chromium from '@sparticuz/chromium-min';
+export const runtime = 'nodejs';
+let _puppeteer: typeof import('puppeteer-core');
 
 /**
  * Vercel対応版 Puppeteerブラウザ起動設定
@@ -14,48 +16,37 @@ export class VercelPuppeteerManager {
    */
   async initialize(): Promise<void> {
     if (this.isInitialized && this.browser) return;
-    
+
     try {
-      console.log('🚀 Vercel対応 Puppeteer初期化開始...');
-      const startTime = Date.now();
-      
-      // 本番環境（Vercel）と開発環境の判定
+      console.log('🚀 Puppeteer初期化開始...');
       const isProduction = process.env.NODE_ENV === 'production';
       const isVercel = process.env.VERCEL === '1';
-      
-      let browserConfig: any;
-      
+
       if (isProduction && isVercel) {
-        console.log('📦 Vercel本番環境: @sparticuz/chromium使用');
-        
-        // Vercel本番環境設定
-        browserConfig = {
-          args: [
-            ...chromium.args,
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-web-security',
-            '--disable-features=VizDisplayCompositor',
-            '--disable-dev-shm-usage',
-            '--disable-gpu',
-            '--disable-background-timer-throttling',
-            '--disable-renderer-backgrounding',
-            '--disable-backgrounding-occluded-windows',
-            '--disable-ipc-flooding-protection',
-            '--window-size=1200,800'
-          ],
+        console.log('📦 本番(Vercel): puppeteer-core + chromium-min');
+
+        _puppeteer = await import('puppeteer-core');
+
+        const executablePath = await chromium.executablePath();
+
+        if (!executablePath) {
+          throw new Error('❌ chromium.executablePath() が null を返しました。');
+        }
+
+        this.browser = await _puppeteer.launch({
+          args: chromium.args,
           defaultViewport: chromium.defaultViewport,
-          executablePath: await chromium.executablePath(),
-          headless: chromium.headless,
+          executablePath,
+          headless: chromium.headless === 'shell' ? true : chromium.headless,
           ignoreHTTPSErrors: true,
-          timeout: 30000
-        };
-        
+        });
       } else {
-        console.log('💻 ローカル開発環境: システムChrome使用');
-        
-        // ローカル開発環境設定
-        browserConfig = {
+        console.log('💻 開発環境: puppeteer フル版');
+
+const devPuppeteer = await import('puppeteer');
+_puppeteer = devPuppeteer as unknown as typeof import('puppeteer-core');
+
+        this.browser = await _puppeteer.launch({
           headless: true,
           args: [
             '--no-sandbox',
@@ -64,19 +55,14 @@ export class VercelPuppeteerManager {
             '--disable-web-security',
             '--window-size=1200,800'
           ],
-          timeout: 15000
-        };
+        });
       }
-      
-      this.browser = await puppeteer.launch(browserConfig);
+
       this.isInitialized = true;
-      
-      const initTime = Date.now() - startTime;
-      console.log(`✅ Puppeteer初期化完了: ${initTime}ms (${isProduction ? 'Vercel' : 'Local'})`);
-      
-    } catch (error) {
-      console.error('❌ Puppeteer初期化エラー:', error);
-      throw new Error(`ブラウザ初期化失敗: ${error}`);
+      console.log('✅ Puppeteer初期化成功');
+    } catch (err) {
+      console.error('❌ Puppeteer初期化エラー:', err);
+      throw err;
     }
   }
   
